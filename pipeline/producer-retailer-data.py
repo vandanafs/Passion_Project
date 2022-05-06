@@ -10,7 +10,10 @@ import s3fs
 import json
 import io
 
+
+
 class Producer:
+
     def __init__(self):
         
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
