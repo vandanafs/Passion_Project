@@ -76,7 +76,7 @@ class XactionConsumer:
         #print(self.consumer)
         #for msg in self.consumer:
           #print("print topic name","Topic Name=%s,Message=%s"%(msg.topic,msg.value))
-
+        print("line added")
 
         for message in self.consumer:
             #message = json.loads(message.value)
