@@ -14,7 +14,7 @@ from flask_wtf import FlaskForm
 from flask_sqlalchemy import SQLAlchemy
 
 
-db_name = 'collections'
+db_name = 'retailor'
 #user = getpass.getuser()
 user='myuser'
 #pass1 = getpass.getpass(stream=None)
@@ -36,6 +36,8 @@ db = SQLAlchemy(app)
 Base = declarative_base()
 #engine=create_engine(f'mysql+pymysql://{user}:{pass1}@localhost/{db_name}')
 engine=create_engine(f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}')
+
+#engine=create_engine(f'mysql+pymysql://{user}:{pass1}@localhost/{db_name}')
 DBSession = sessionmaker(bind=engine)
 
 
@@ -116,34 +118,10 @@ class XactionConsumer:
         
             #value_deserializer=lambda m: loads(m.decode('ascii')))
         print('am here')
-        #for msg in self.consumer:
-         # print('am here too')
-          #print("print topic name","Topic Name=%s,Message=%s"%(msg.topic,msg.value))
-
-        ## These are two python dictionarys
-        # Ledger is the one where all the transaction get posted
-
-        #self.ledger = {}
-
-        # custBalances is the one where the current blance of each customer
-        # account is kept.
-
-        #self.custBalances = {}
-
-        # THE PROBLEM is every time we re-run the Consumer, ALL our customer
-        # data gets lost!
-        # add a way to connect to your database here.
-
-        #Go back to the readme.
-
-
+       
 
     def handleMessages(self):
-        print('hi1')
-        #print(self.consumer)
-        #for msg in self.consumer:
-          #print("print topic name","Topic Name=%s,Message=%s"%(msg.topic,msg.value))
-
+        
 
         for message in self.consumer:
             #message = json.loads(message.value)
@@ -163,13 +141,7 @@ class XactionConsumer:
                 message['Image'],message['adeclarative'],message['alinknormal_URL'],message['asizebase'],message['aoffscreen'],message['Price'],message['asizebase2'],message['arow'],message['like'],message['scouponunclipped__spancontains_class_acolorbase'],message['arow3'],message['acolorbase']))
           
                 
-          #  if message['custid'] not in self.custBalances:
-               # self.custBalances[message['custid']] = 0
-            #if message['type'] == 'dep':
-              #  self.custBalances[message['custid']] += message['amt']
-            #else:
-                #self.custBalances[message['custid']] -= message['amt']
-            #print(self.custBalances)
+        
           
 
 
@@ -177,9 +149,7 @@ class XactionConsumer:
 
     def handleMessages1(self):
        print('hi1')
-    #print(self.consumer)
-    #for msg in self.consumer:
-      #print("print topic name","Topic Name=%s,Message=%s"%(msg.topic,msg.value))
+    
 
 
        for message in self.consumer:
@@ -189,9 +159,8 @@ class XactionConsumer:
            df = pd.DataFrame(message)
            df = df[df['Image'].notna()]
            print(df.head())
-        # if if_exists='replace' then append
-           #df.to_sql('items',conn=engine,if_exists='replace',index=False)
-           df.to_sql('items',conn=engine,if_exists='replace',index=False)
+        
+           df.to_sql('items',con=engine,if_exists='replace',index=False)
 
 if __name__ == "__main__":
     #Base.metadata.create_all(engine)

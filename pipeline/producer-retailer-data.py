@@ -9,6 +9,7 @@ import pandas as pd
 import s3fs
 import json
 import io
+from s3fs.core import S3FileSystem  # pandas uses s3fs for s3 conn
 
 
 
@@ -19,7 +20,7 @@ class Producer:
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
        
     def emit(self):
-        path1='s3://productscsv/toys_rating4.csv'
+        path1='s3://productscsv/toys_rating3.csv'
         df_toys=pd.read_csv(path1)
         #return df_toys
         df_toys2 = df_toys.to_json()
