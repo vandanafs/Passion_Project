@@ -2,6 +2,7 @@ import getpass
 import os
 from kafka import KafkaConsumer, TopicPartition
 from json import loads
+from pyspark import SparkContext
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -16,7 +17,9 @@ from flask_sqlalchemy import SQLAlchemy
 import pymysql
 import pandas as pd
 import boto3
+from pyspark.sql import SparkSession
 
+spark=SparkSession.builder.getOrCreate()
 db_name = 'retailer'
 #user = getpass.getuser()
 user = 'myuser'
@@ -121,7 +124,7 @@ class XactionConsumer:
             group_id = None,
             #enable.partition.eof = false
             value_deserializer=lambda m: loads(m.decode('utf-8')))
-            #value_deserializer=lambda m: loads(m.decode('ascii')))
+           
         print('am here')
         
 
@@ -136,10 +139,20 @@ class XactionConsumer:
             print(message.keys())
             df = pd.DataFrame(message) #converting message into dataframe 
             df = df[df['Image'].notna()]  #consider only not null values
-            print(df.head())  #DF
+            print(df.head())  
             #print(df)
             # if if_exists='replace' then append
-            df.to_sql('items',con=engine,if_exists='replace',index=False)
+            
+            df.to_sql('items',con=engine,if_exists='replace',index=False)  
+            sparkDF=spark.createDataFrame(df)
+            print("spark dataframe")
+            sparkDF.show()
+            print("Print rating dessending")
+            #sparkDF.schema().dataType
+            types=[f.dataType for f in sparkDF.schema.fields]
+            print(types)
+            sparkDF.orderBy(["asizebase"], ascending=True).show()
+
           
 
 

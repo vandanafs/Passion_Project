@@ -121,16 +121,7 @@ class XactionConsumer:
        
 
     def handleMessages(self):
-<<<<<<< HEAD
-        print('hi1')
-        #print(self.consumer)
-        #for msg in self.consumer:
-          #print("print topic name","Topic Name=%s,Message=%s"%(msg.topic,msg.value))
-        print("line added")
-=======
-        
->>>>>>> 27fd25df6990bfd8ea3b6682c0bd9842adf75881
-
+       
         for message in self.consumer:
             #message = json.loads(message.value)
             #message = message.value
