@@ -27,7 +27,7 @@ class Producer:
 
   
 
-    def generateRandomXactions(self, n=1000):
+    def generateRandomXactions(self):
         #self.producer.send('READDATA_PROJECT', b'Hello, World!')
         #self.producer.send('READDATA_PROJECT', key=b'message-two', value=b'This is Kafka-Python')
         data = self.emit()
