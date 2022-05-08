@@ -18,6 +18,7 @@ import pymysql
 import pandas as pd
 import boto3
 from pyspark.sql import SparkSession
+import mysql.connector
 
 spark=SparkSession.builder.getOrCreate()
 db_name = 'retailer'
@@ -27,19 +28,21 @@ pass1 = 'myPass05'
 db_name = 'collections'
 print(user,pass1)
 
-#client =boto3.client('secretsmanager')
+'''client =boto3.client('secretsmanager')
 
-#response = client.put_secret_value(
-   # SecretId='dev/home/myapp'
+response = client.put_secret_value(
+    SecretId='dev/home/myapp'
     
-#)
-#secretDict= json.loads(response['SecretString']) # converting string to dict
-#conn = f'mysql+pymysql://{user}:{pass1}@secretDict[host]/{db_name}'
+)
+secretDict= json.loads(response['SecretString']) # converting string to dict
+mydb=mysql.connector.connect (
+    host=secretDict['host'], #   mapping host name SM to host variable
+    user=secretDict['username'],
+    passwd=secretDict['password'],
+    database=secretDict['dbname'],
+)
+mycursor=mydb.cursor()'''
 
-#secretDict['host']
-#secretDict['username']
-#secretDict['password']
-#secretDict['dbname']
 conn = f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}'
 
 app = Flask(__name__)
