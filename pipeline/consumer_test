@@ -2,6 +2,7 @@ import getpass
 import os
 from kafka import KafkaConsumer, TopicPartition
 from json import loads
+from pyspark import SparkContext
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -16,29 +17,42 @@ from flask_sqlalchemy import SQLAlchemy
 import pymysql
 import pandas as pd
 import boto3
+from pyspark.sql import SparkSession
+import mysql.connector
+import numpy as np
+spark=SparkSession.builder.getOrCreate()
 
-db_name = 'retailer'
 #user = getpass.getuser()
 user = 'myuser'
 pass1 = 'myPass05'
 db_name = 'collections'
 print(user,pass1)
+'''
+client =boto3.client('secretsmanager')
 
-#client =boto3.client('secretsmanager')
-
-#response = client.put_secret_value(
-   # SecretId='dev/home/myapp'
+response = client.put_secret_value(
+    SecretId='dev/home/myapp'
     
-#)
-#secretDict= json.loads(response['SecretString']) # converting string to dict
-#conn = f'mysql+pymysql://{user}:{pass1}@secretDict[host]/{db_name}'
+)
+secretDict= json.loads(response['SecretString']) # converting string to dict
+'''
+'''mydb=mysql.connector.connect (
+    host=secretDict['host'], #   mapping host name SM to host variable
+    user=secretDict['username'],
+    passwd=secretDict['password'],
+    database=secretDict['dbname'],
+)
+mycursor=mydb.cursor()'''
+'''
+user=secretDict['username']
+pass1=secretDict['password']
+host=secretDict['host']
+print(user)
+'''
 
-#secretDict['host']
-#secretDict['username']
-#secretDict['password']
-#secretDict['dbname']
+#conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
+
 conn = f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}'
-
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'SuperSecretKey'
 app.config['SQLALCHEMY_DATABASE_URI'] = conn
@@ -47,39 +61,32 @@ db = SQLAlchemy(app)
 
 Base = declarative_base()
 engine=create_engine(f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}')
+#engine=create_engine(f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}')
 DBSession = sessionmaker(bind=engine)
 class items(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     Title = db.Column(db.String(40960))
     Image = db.Column(db.String(40960))
-    adeclarative = db.Column(db.String(40960))
-    alinknormal_URL = db.Column(db.String(40960)) 
-    asizebase = db.Column(db.String(40960))
-    aoffscreen = db.Column(db.String(40960))
+    Rating = db.Column(db.String(40960))
+    ProdLink = db.Column(db.String(40960)) 
+    TotalReviews = db.Column(db.String(40960))
     Price = db.Column(db.String(40960))
-    Price1 = db.Column(db.String(40960))
-    asizebase2 = db.Column(db.String(40960))
-    arow = db.Column(db.String(40960))
-    Like = db.Column(db.String(40960))
-    scouponunclipped__spancontains_class_acolorbase  = db.Column(db.String(40960))
-    arow3 = db.Column(db.String(40960))
-    acolorbase = db.Column(db.String(40960))
+    OrgPrice = db.Column(db.String(40960))
+    CouponsDesc = db.Column(db.String(40960))
+    CouponsSummery = db.Column(db.String(40960))
+    CouponPrice  = db.Column(db.String(40960))
 
-    def __init__(self,Title,Image,adeclarative,alinknormal_URL,asizebase,aoffscreen,Price,Price1,asizebase2,arow,Like,scouponunclipped__spancontains_class_acolorbase,arow3,acolorbase):
+    def __init__(self,Title,Image,Rating,ProdLink,TotalReviews,Price,OrgPrice,CouponsDesc,CouponsSummery,CouponPrice):
         self.Title = Title
         self.Image = Image
-        self.adeclarative = adeclarative
-        self.alinknormal_URL = alinknormal_URL
-        self.asizebase = asizebase
-        self.asizebase = asizebase
+        self.Rating = Rating
+        self.ProdLink = ProdLink
+        self.TotalReviews = TotalReviews
         self.Price = Price
-        self.Price1 = Price1
-        self.asizebase2 = asizebase2
-        self.arow = arow
-        self.Like = Like
-        self.scouponunclipped__spancontains_class_acolorbase = scouponunclipped__spancontains_class_acolorbase
-        self.arow3 = arow3
-        self.acolorbase = acolorbase
+        self.OrgPrice = OrgPrice
+        self.CouponsDesc = CouponsDesc
+        self.CouponsSummery = CouponsSummery
+        self.CouponPrice = CouponPrice
 
 
 
@@ -121,7 +128,7 @@ class XactionConsumer:
             group_id = None,
             #enable.partition.eof = false
             value_deserializer=lambda m: loads(m.decode('utf-8')))
-            #value_deserializer=lambda m: loads(m.decode('ascii')))
+           
         print('am here')
         
 
@@ -135,11 +142,28 @@ class XactionConsumer:
             message = json.loads(message.value)
             print(message.keys())
             df = pd.DataFrame(message) #converting message into dataframe 
+            print(df.head())
+            df.replace(r'^\s*$', np.nan, regex=True, inplace = True)
             df = df[df['Image'].notna()]  #consider only not null values
-            print(df.head())  #DF
+            df.replace(r'^\s*$', np.nan, regex=True)
+            df['CouponPrice'] = df['CouponPrice'].fillna("")
+            print(df.head())  
             #print(df)
             # if if_exists='replace' then append
-            df.to_sql('items',con=engine,if_exists='replace',index=False)
+            
+            df.to_sql('items',con=engine,if_exists='replace',index=False)  
+            sparkDF=spark.createDataFrame(df)
+            sparkDF.printSchema()
+
+            print("spark dataframe")
+            sparkDF.show()
+            print("Print rating dessending")
+            #sparkDF.schema().dataType
+            types=[f.dataType for f in sparkDF.schema.fields]
+            print(types)
+            sparkDF.orderBy(["Price"], ascending=False).show()
+            break
+
           
 
 

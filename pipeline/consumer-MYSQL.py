@@ -121,8 +121,7 @@ class XactionConsumer:
        
 
     def handleMessages(self):
-        
-
+       
         for message in self.consumer:
             #message = json.loads(message.value)
             #message = message.value
