@@ -51,14 +51,15 @@ def cleanData(path1):
             'Like':'CouponsSummery'
 
         })
-    #
+    #removing the white space
     df = df1.applymap(lambda x: x.strip() if isinstance(x, str) else x)
     
     #
-    cols = df1.select_dtypes(['object']).columns
-    df1[cols] = df1[cols].apply(lambda x: x.str.strip())
+    cols = df1.select_dtypes(['object']).columns 
+     # each column header remove white space
+    df1[cols] = df1[cols].apply(lambda x: x.str.strip()) 
     
-    #keep not null values 
+    #
     df = df1[df1['Image'].notna()]
     df = df1[df1['ProdLink'].notna()]
     df = df1[df1['Title'].notna()]
@@ -70,12 +71,13 @@ def cleanData(path1):
     df.Price.fillna(df.OrgPrice, inplace=True)
     df.OrgPrice.fillna(df.Price, inplace=True)
 
-    #Print Missing Values for reference, any column is null
+    #Print Missing Values for reference, null values from DS
     df[df.isnull().any(axis=1)]
 
     #Removing Commas in the  TotalReviews columns and converting them to float
     df['TotalReviews'] = df['TotalReviews'].str.replace(',', '').astype(float)
 
+    #handle default data type, format
     locale.setlocale(locale.LC_ALL,'')
     df['Price']=df.Price.map(lambda x: locale.atof(x.strip('$')))
     df['OrgPrice']=df.OrgPrice.map(lambda x: locale.atof(x.strip('$')))
@@ -89,7 +91,9 @@ def cleanData(path1):
     df['CouponsSummery'] = df['CouponsSummery'].fillna('')
     #passing row[couponSummary] and row[price] column price for Couponed price
     df['CouponPrice'] = df.apply(lambda row: create_value(row['CouponsSummery'],row['Price']), axis=1)
-     #
+
+
+     #row which have empty values, removing '/" 
     df.replace(r'^\s*$', np.nan, regex=True, inplace = True)
     print(df.head())
     return df        
@@ -112,7 +116,7 @@ class Producer:
 
   
 
-    def generateRandomXactions(self):
+    def sendProductCatalog(self):
         #self.producer.send('READDATA_PROJECT', b'Hello, World!')
         #self.producer.send('READDATA_PROJECT', key=b'message-two', value=b'This is Kafka-Python')
         data = self.emit()
@@ -126,4 +130,4 @@ class Producer:
 
 if __name__ == "__main__":
     p = Producer()
-    p.generateRandomXactions()
+    p.sendProductCatalog()
