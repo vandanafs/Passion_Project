@@ -26,7 +26,7 @@ spark=SparkSession.builder.getOrCreate()
 user = 'myuser'
 pass1 = 'myPass05'
 db_name = 'collections'
-print(user,pass1)
+#print(user,pass1)
 '''
 client =boto3.client('secretsmanager')
 
@@ -120,7 +120,7 @@ engine=create_engine(f'mysql+pymysql://{user}:{pass1}@localhost/{db_name}')
 Base = declarative_base(bind=engine)
 '''
 
-class XactionConsumer:
+class ProductCatalogConsumer:
     def __init__(self):
         self.consumer = KafkaConsumer('READ_DATA',
             bootstrap_servers=['localhost:9092'],
@@ -129,21 +129,15 @@ class XactionConsumer:
             #enable.partition.eof = false
             value_deserializer=lambda m: loads(m.decode('utf-8')))
            
-        print('am here')
-        
-
-
-
     def handleMessages(self):
         
-
-
-        for message in self.consumer:
+         for message in self.consumer:
             message = json.loads(message.value)
             print(message.keys())
             df = pd.DataFrame(message) #converting message into dataframe 
             print(df.head())
-            df.replace(r'^\s*$', np.nan, regex=True, inplace = True)
+
+            #df.replace(r'^\s*$', np.nan, regex=True, inplace = True)
             df = df[df['Image'].notna()]  #consider only not null values
             df.replace(r'^\s*$', np.nan, regex=True)
             df['CouponPrice'] = df['CouponPrice'].fillna("")
@@ -152,6 +146,8 @@ class XactionConsumer:
             # if if_exists='replace' then append
             
             df.to_sql('items',con=engine,if_exists='replace',index=False)  
+
+            # to sort, processing 
             sparkDF=spark.createDataFrame(df)
             sparkDF.printSchema()
 
@@ -173,5 +169,5 @@ class XactionConsumer:
 
 if __name__ == "__main__":
     
-    c = XactionConsumer()
+    c = ProductCatalogConsumer()
     c.handleMessages()
