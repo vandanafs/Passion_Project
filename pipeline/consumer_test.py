@@ -21,7 +21,7 @@ from pyspark.sql import SparkSession
 import mysql.connector
 import numpy as np
 spark=SparkSession.builder.getOrCreate()
-from retrive import *
+from prod  import *
 from models import *
 import uuid
 from config import *
