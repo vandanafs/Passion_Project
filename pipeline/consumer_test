@@ -21,12 +21,19 @@ from pyspark.sql import SparkSession
 import mysql.connector
 import numpy as np
 spark=SparkSession.builder.getOrCreate()
+from retrive import *
 
-#user = getpass.getuser()
-user = 'myuser'
-pass1 = 'myPass05'
+#config=json.loads(get_secret())
+#print(config['username'],config['password'],config['host'])
+
+#user = 'myuser'
+#pass1 = 'myPass05'
 db_name = 'collections'
 #print(user,pass1)
+config=get_secret()
+host=config['host']
+user=config['username']
+pass1=config['passowrd']
 '''
 client =boto3.client('secretsmanager')
 
@@ -50,9 +57,9 @@ host=secretDict['host']
 print(user)
 '''
 
-#conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
+conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
 
-conn = f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}'
+#conn = f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}'
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'SuperSecretKey'
 app.config['SQLALCHEMY_DATABASE_URI'] = conn
@@ -60,7 +67,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False;
 db = SQLAlchemy(app)
 
 Base = declarative_base()
-engine=create_engine(f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}')
+engine=create_engine(f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}')
+#engine=create_engine(f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}')
 #engine=create_engine(f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}')
 DBSession = sessionmaker(bind=engine)
 class items(db.Model):
@@ -153,7 +161,7 @@ class ProductCatalogConsumer:
 
             print("spark dataframe")
             sparkDF.show()
-            print("Print rating dessending")
+            print("Print rating descending")
             #sparkDF.schema().dataType
             types=[f.dataType for f in sparkDF.schema.fields]
             print(types)
@@ -168,6 +176,8 @@ class ProductCatalogConsumer:
       
 
 if __name__ == "__main__":
-    
+    db.create_all(app=app)
+    db.session.commit()
+    Base.metadata.create_all(engine)
     c = ProductCatalogConsumer()
     c.handleMessages()
