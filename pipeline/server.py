@@ -11,7 +11,7 @@ db = SQLAlchemy(app1)
 db.imit_app(app1)
 
 
-
+'''
 @app.route('/')
 def products_list():
     prod_list=[]
@@ -22,3 +22,4 @@ def products_list():
         prod_dict.append(prod_dict)
     print(prod_list)
     return jsonify(prod_list)    
+'''
