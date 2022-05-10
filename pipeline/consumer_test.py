@@ -22,18 +22,21 @@ import mysql.connector
 import numpy as np
 spark=SparkSession.builder.getOrCreate()
 from retrive import *
+from models import *
 
-#config=json.loads(get_secret())
+
+config=json.loads(get_secret())
 #print(config['username'],config['password'],config['host'])
 
 #user = 'myuser'
 #pass1 = 'myPass05'
 db_name = 'collections'
 #print(user,pass1)
-config=get_secret()
+
 host=config['host']
 user=config['username']
 pass1=config['passowrd']
+conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
 '''
 client =boto3.client('secretsmanager')
 
@@ -57,7 +60,6 @@ host=secretDict['host']
 print(user)
 '''
 
-conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
 
 #conn = f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}'
 app = Flask(__name__)
@@ -71,30 +73,7 @@ engine=create_engine(f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}')
 #engine=create_engine(f'mysql+pymysql://{user}:{pass1}@database-1.cbrnhoat32p7.us-east-1.rds.amazonaws.com/{db_name}')
 #engine=create_engine(f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}')
 DBSession = sessionmaker(bind=engine)
-class items(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
-    Title = db.Column(db.String(40960))
-    Image = db.Column(db.String(40960))
-    Rating = db.Column(db.String(40960))
-    ProdLink = db.Column(db.String(40960)) 
-    TotalReviews = db.Column(db.String(40960))
-    Price = db.Column(db.String(40960))
-    OrgPrice = db.Column(db.String(40960))
-    CouponsDesc = db.Column(db.String(40960))
-    CouponsSummery = db.Column(db.String(40960))
-    CouponPrice  = db.Column(db.String(40960))
 
-    def __init__(self,Title,Image,Rating,ProdLink,TotalReviews,Price,OrgPrice,CouponsDesc,CouponsSummery,CouponPrice):
-        self.Title = Title
-        self.Image = Image
-        self.Rating = Rating
-        self.ProdLink = ProdLink
-        self.TotalReviews = TotalReviews
-        self.Price = Price
-        self.OrgPrice = OrgPrice
-        self.CouponsDesc = CouponsDesc
-        self.CouponsSummery = CouponsSummery
-        self.CouponPrice = CouponPrice
 
 
 
