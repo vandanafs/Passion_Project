@@ -23,10 +23,11 @@ import numpy as np
 spark=SparkSession.builder.getOrCreate()
 from retrive import *
 from models import *
+import uuid
 
-
+#print('Test the type',type(get_secret()))
 config=json.loads(get_secret())
-#print(config['username'],config['password'],config['host'])
+print(config['username'],config['password'],config['host'])
 
 #user = 'myuser'
 #pass1 = 'myPass05'
@@ -35,7 +36,7 @@ db_name = 'collections'
 
 host=config['host']
 user=config['username']
-pass1=config['passowrd']
+pass1=config['password']
 conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
 '''
 client =boto3.client('secretsmanager')
@@ -77,7 +78,7 @@ DBSession = sessionmaker(bind=engine)
 
 
 
-items.__table__.create(bind=engine, checkfirst=True)
+#items.__table__.create(bind=engine, checkfirst=True)
 #Base.metadata.tables["items"].create(bind = engine)
 Base.metadata.create_all(engine)
 #db_engine=create_engine(f'mysql+pymysql://{user}:{pass1}@localhost')

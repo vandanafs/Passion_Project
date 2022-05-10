@@ -33,7 +33,11 @@ def get_secret():
         if 'SecretString' in get_secret_value_response:
             text_secret_data = get_secret_value_response['SecretString']
             print(text_secret_data)
+            return text_secret_data      
         else:
             binary_secret_data = get_secret_value_response['SecretBinary']
+           # print('Test the type',type(get_secret()))
+            return binary_secret_data    
 
-get_secret()            
+get_secret()    
+        
