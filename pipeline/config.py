@@ -6,8 +6,8 @@ from sqlalchemy.orm import sessionmaker
 
 
 #Credentials to Access Database
-user = 'ubuntu'
-pass1 = 'ubuntu'
+user = 'myuser'
+pass1 = 'mypass'
 db_name = 'collections'
 
 #Creating Connection String to Database

@@ -39,11 +39,11 @@ conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
 
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'SuperSecretKey'
-app.config['SQLALCHEMY_DATABASE_URI'] = conn
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False; 
-db = SQLAlchemy(app)
+app1 = Flask(__name__)
+app1.config['SECRET_KEY'] = 'SuperSecretKey'
+app1.config['SQLALCHEMY_DATABASE_URI'] = conn
+app1.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False; 
+db = SQLAlchemy(app1)
 
 Base = declarative_base()
 engine=create_engine(f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}')
@@ -107,7 +107,7 @@ class ProductCatalogConsumer:
       
 
 if __name__ == "__main__":
-    db.create_all(app=app)
+    db.create_all(app=app1)
     db.session.commit()
     Base.metadata.create_all(engine)
     c = ProductCatalogConsumer()
