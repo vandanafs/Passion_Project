@@ -24,40 +24,15 @@ spark=SparkSession.builder.getOrCreate()
 from retrive import *
 from models import *
 import uuid
+from config import *
 
-#print('Test the type',type(get_secret()))
-config=json.loads(get_secret())
-print(config['username'],config['password'],config['host'])
-db_name = 'collections'
-#print(user,pass1)
-
-host=config['host']
-user=config['username']
-pass1=config['password']
-conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
-
-
-
+conn,db=initDb()
 
 app1 = Flask(__name__)
 app1.config['SECRET_KEY'] = 'SuperSecretKey'
 app1.config['SQLALCHEMY_DATABASE_URI'] = conn
 app1.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False; 
 db = SQLAlchemy(app1)
-
-Base = declarative_base()
-engine=create_engine(f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}')
-
-DBSession = sessionmaker(bind=engine)
-
-
-
-
-#items.__table__.create(bind=engine, checkfirst=True)
-#Base.metadata.tables["items"].create(bind = engine)
-#Base.metadata.create_all(engine)
-
-
 
 
 class ProductCatalogConsumer:
@@ -76,15 +51,9 @@ class ProductCatalogConsumer:
             df = pd.DataFrame(message) #converting message into dataframe 
             print(df.head())
 
-            #df.replace(r'^\s*$', np.nan, regex=True, inplace = True)
-            df = df[df['Image'].notna()]  #consider only not null values
-            df.replace(r'^\s*$', np.nan, regex=True)
-            df['CouponPrice'] = df['CouponPrice'].fillna("")
-            print(df.head())  
-            #print(df)
-            # if if_exists='replace' then append
-            
-            df.to_sql('items',con=engine,if_exists='replace',index=False)  
+            df.reset_index()
+            df['id']=np.arange(len(df))
+            df.to_sql('items',con=conn,if_exists='replace',index=False)  
 
             # to sort, processing 
             sparkDF=spark.createDataFrame(df)
