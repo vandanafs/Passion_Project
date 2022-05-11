@@ -31,7 +31,7 @@ def create_value(row,price):
 def cleanData(path1):
 
     df=pd.read_csv(path1)
-    print(df.head())
+    print("Totals records on data set",df.shape)
     # limiting these columns
     new_df=df[['Title','Image','adeclarative','alinknormal_URL','asizebase','aoffscreen','Price1','arow','Like']] 
      # removing sponsored ad words from data set
@@ -95,7 +95,7 @@ def cleanData(path1):
 
      #row which have empty values, removing '/" 
     df.replace(r'^\s*$', np.nan, regex=True, inplace = True)
-    print(df.head())
+    #print(df.head())
     return df        
 
 class Producer:
@@ -105,13 +105,14 @@ class Producer:
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
        
     def emit(self):
-        path1='s3://productscsv/toys_rating4.csv'
+        path1='s3://productscsv/toys.csv'
         #df_toys=pd.read_csv(path1)
         df_toys=cleanData(path1)
+        print(df_toys)
         #Converting into json
         df_toys2 = df_toys.to_json()
         for col in df_toys.columns:
-            print(col)
+            print('Column header', col)
         return json.dumps(df_toys2).encode("utf-8")
 
   
@@ -120,7 +121,7 @@ class Producer:
         #self.producer.send('READDATA_PROJECT', b'Hello, World!')
         #self.producer.send('READDATA_PROJECT', key=b'message-two', value=b'This is Kafka-Python')
         data = self.emit()
-        print('Test Data', data)
+        #print('Test Data', data)
         
         self.producer.send(topic='READ_DATA', value=data)
         #data5 = json.dumps(data)

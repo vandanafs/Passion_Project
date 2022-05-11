@@ -3,20 +3,44 @@ from sqlalchemy.ext.declarative import declarative_base
 import pymysql
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import os
+from dev import *
+from prod import *
 
+db=None
+conn=None
 
-#Credentials to Access Database
-user = 'ubuntu'
-pass1 = 'ubuntu'
-db_name = 'collections'
+def initDb():
+    config = {}
+    #if os.environ['dbenv'] == "dev":
+       # config = getDevCreds()
+    #if os.environ['dbenv'] == "prod":
+    config = getProdCreds()
+    print('Config properties', config)
+
+    db_name = 'collections'
+    host = config['host']
+    user = config['username']
+    pass1 = config['password']
+    global db
+    global conn
 
 #Creating Connection String to Database
-conn = f'mysql+pymysql://{user}:{pass1}@localhost/{db_name}'
+    conn = f'mysql+pymysql://{user}:{pass1}@{host}/{db_name}'
+    db = SQLAlchemy()
 
-db = SQLAlchemy()
+    #Creating table if not exists
+    print("Before Db copnnection")
+    
+    dbconn = pymysql.connect(host=host, user=user, passwd=pass1, connect_timeout=10)
+    with dbconn.cursor() as cur:
+        cur.execute(f'Create DATABASE IF NOT EXISTS {db_name}')
+        cur.execute(f'use {db_name}')
 
-Base = declarative_base()
-engine=create_engine(f'mysql+pymysql://{user}:{pass1}@localhost/{db_name}')
-DBSession = sessionmaker(bind=engine)
-#items.__table__.create(bind=engine, checkfirst=True)
-Base.metadata.create_all(engine)
+
+    #print("Using Config: ",os.environ['dbenv']," ",config)
+    return conn,db
+
+
+
+initDb()

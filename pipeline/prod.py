@@ -1,7 +1,8 @@
 import boto3
 from botocore.exceptions import ClientError
+import json
 
-def get_secret():
+def getProdCreds():
     secret_name = "dev/home/myapp"
     region_name = "us-east-1"
 
@@ -32,12 +33,14 @@ def get_secret():
         # Depending on whether the secret was a string or binary, only one of these fields will be populated
         if 'SecretString' in get_secret_value_response:
             text_secret_data = get_secret_value_response['SecretString']
-            print(text_secret_data)
-            return text_secret_data      
+            #print(text_secret_data)
+            #return text_secret_data      
         else:
             binary_secret_data = get_secret_value_response['SecretBinary']
            # print('Test the type',type(get_secret()))
-            return binary_secret_data    
+            #return binary_secret_data    
 
-get_secret()    
+        return json.loads(text_secret_data)    
+
+#get_secret()    
         
