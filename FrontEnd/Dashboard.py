@@ -11,7 +11,7 @@ import locale
 import seaborn as sns
 import matplotlib.pyplot as plt
 from IPython.display import HTML
-
+#import plotly.graph_objects as px
 
 header=st.container()
 dataset=st.container()
@@ -21,7 +21,7 @@ def make_clickable(val):
     return '<a href="{}">{}</a>'.format(val,val)
 
 with header:
-    st.title('Welcome to page')
+    st.title('Welcome to Deals Tree!!')
     st.image('/Users/vandana/myProj/Passion_Project/FrontEnd/deals.jpeg')
     st.sidebar.header('User Input Features')
 with dataset:
@@ -33,9 +33,32 @@ with dataset:
     df.style.format({'ProdLink': make_clickable})
     #st.write(HTML(df.head().to_html(render_links=True,col_space='10px')))
     st.write(df.style.format({'deals': '{:.2f}'}), width=5000, height=1000)
+    
 
+    df2=df
+    df2['bins']=pd.cut(df['PercentReduction'],bins=[0,30,45,65], labels=["0-30","30-45","45+"])
+    df3=df2
+    df3=df3.groupby(['PercentReduction','bins']).size().unstack(fill_value=0)
+    bin_percent = pd.DataFrame(df2['bins'].value_counts(normalize=True)*100)
+    plot = bin_percent.plot.pie(y='bins',figsize=(5,5), autopct='%1.1f%%')
+    #print(plot)
+    # st.write(plot)
+    #st.pyplot(plot)
+    #st.plotly_chart(plot)
+    #input_col, pie_col = st.beta_columns(2)
+    #st.write(df3)
+    #df3 = df3.reset_index()
+    #df3.columns = ['PercentReduction', 'bins']
+    #fig = px.pie(df3, values = 'bins')
+    #pie_col.write(fig)
+   #st.plotly_chart(fig)
+    
+    #working
     perc = pd.DataFrame(df['PercentReduction']).head(20)
     st.bar_chart(perc)
+
+
+    
 
 def sidebar_bg(side_bg):
     side_bg_ext = 'jpeg'
