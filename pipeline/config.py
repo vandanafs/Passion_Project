@@ -16,7 +16,7 @@ def initDb():
        # config = getDevCreds()
     #if os.environ['dbenv'] == "prod":
     config = getProdCreds()
-    print('Config properties', config)
+    #print('Config properties', config)
 
     db_name = 'collections'
     host = config['host']

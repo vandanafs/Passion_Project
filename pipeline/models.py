@@ -19,8 +19,10 @@ class items(db.Model):
     CouponsDesc = db.Column(db.String(40960))
     CouponsSummery = db.Column(db.String(40960))
     CouponPrice  = db.Column(db.String(40960))
+    PercentReduction  = db.Column(db.String(40960))
 
-    def __init__(self,Title,Image,Rating,ProdLink,TotalReviews,Price,OrgPrice,CouponsDesc,CouponsSummery,CouponPrice):
+
+    def __init__(self,Title,Image,Rating,ProdLink,TotalReviews,Price,OrgPrice,CouponsDesc,CouponsSummery,CouponPrice,PercentReduction):
         self.Title = Title
         self.Image = Image
         self.Rating = Rating
@@ -31,4 +33,5 @@ class items(db.Model):
         self.CouponsDesc = CouponsDesc
         self.CouponsSummery = CouponsSummery
         self.CouponPrice = CouponPrice
+        self.PercentReduction=PercentReduction
         

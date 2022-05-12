@@ -14,16 +14,20 @@ from IPython.display import HTML
 import plotly.graph_objects as px
 import plotly.express as px2
 from PIL import Image
+from pathlib import Path
 header=st.container()
 dataset=st.container()
-
+# Banner image
+image = st.container()
 def make_clickable(val):
     #return f'<a target="_blank" href="{val}">{val}</a>'
     return '<a href="{}">{}</a>'.format(val,val)  
 
+def img_to_bytes(img_path):
+    img_bytes = Path(img_path).read_bytes()
+    encoded = base64.b64encode(img_bytes).decode()
+    return encoded
 
-# Banner image
-image = st.container()
 with image:
     banner = Image.open('deals.jpeg')
     st.image(banner, width=810, use_column_width=True)
@@ -37,7 +41,12 @@ with st.sidebar:
 with header:
     st.title('Welcome to Deals Tree!!')
     #st.image('/Users/vandana/myProj/Passion_Project/FrontEnd/deals.jpeg')
-    
+    header_html = "<img src='data:image/png;base64,{}' class='img-fluid' width=700 height=150>".format(
+    img_to_bytes("deals.jpeg")
+    )
+    st.markdown(
+    header_html, unsafe_allow_html=True,
+    )
 with dataset:
     st.header('Amazon:'+select_platform)
     #st.write(select_platform)
@@ -70,7 +79,7 @@ with dataset:
     #st.pyplot(bin_percent.iloc[:,-1].value_counts().plot.pie(autopct="%1.1f%%"))
     
     #st.write(bin_percent.head())
-    st.header("Pie Chart1")
+    st.header("Deals Distribution based on % Discount")
     #fig2=px2.pie(bin_percent,labels=bin_percent['index'], values='bins', names='bins')
 
     fig2=px2.pie(bin_percent, values='bins', names=bin_percent.index)
@@ -82,7 +91,7 @@ with dataset:
     df5['bins']=pd.cut(df['TotalReviews'],bins=[0,500,1000,100000], labels=["0-500","500-1000","1000+"])
 
     bin_percent2 = pd.DataFrame(df5['bins'].value_counts(normalize=True)*100)    
-    st.header("Pie Chart2")
+    st.header("Deals Distribution based on # of Reviews")
     fig3=px2.pie(bin_percent2, values='bins', names=bin_percent2.index)
     
     st.plotly_chart(fig3)
