@@ -26,17 +26,19 @@ conn,db=initDb()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'SuperSecretKey'
-app.config['SQLALCHEMY_DATABASE_URI'] = conn
+#app.config['SQLALCHEMY_DATABASE_URI'] = conn
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False; 
-db.init_app(app)
+#db.init_app(app)
 
 
 class ProductCatalogConsumer:
     def __init__(self):
         self.consumer = KafkaConsumer('READ_DATA',
+       # self.consumer = KafkaConsumer('READ_LAPTOP',
             bootstrap_servers=['localhost:9092'],
             auto_offset_reset='earliest',
             group_id = None,
+            
             value_deserializer=lambda m: json.loads(m.decode('utf-8')))
            
     def handleMessages(self):
@@ -46,10 +48,11 @@ class ProductCatalogConsumer:
             print(message.keys())
             df = pd.DataFrame(message) #converting message into dataframe 
             print(df.head())
+            print(df.columns)
 
             df.reset_index()
             df['id']=np.arange(len(df))
-            df.to_sql('items',con=conn,if_exists='replace',index=False)  
+            df.to_sql('laptops',con=conn,if_exists='replace',index=False)  
             break
             # to sort, processing 
             

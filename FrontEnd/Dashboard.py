@@ -11,54 +11,89 @@ import locale
 import seaborn as sns
 import matplotlib.pyplot as plt
 from IPython.display import HTML
-#import plotly.graph_objects as px
-
+import plotly.graph_objects as px
+import plotly.express as px2
+from PIL import Image
 header=st.container()
 dataset=st.container()
 
 def make_clickable(val):
     #return f'<a target="_blank" href="{val}">{val}</a>'
-    return '<a href="{}">{}</a>'.format(val,val)
+    return '<a href="{}">{}</a>'.format(val,val)  
 
+
+# Banner image
+image = st.container()
+with image:
+    banner = Image.open('deals.jpeg')
+    st.image(banner, width=810, use_column_width=True)
+
+with st.sidebar:
+    st.sidebar.header('Choose a category')
+   
+    select_platform = st.selectbox('Category Select', ['Toys',
+                                                         'Laptops'])
+   
 with header:
     st.title('Welcome to Deals Tree!!')
-    st.image('/Users/vandana/myProj/Passion_Project/FrontEnd/deals.jpeg')
-    st.sidebar.header('User Input Features')
+    #st.image('/Users/vandana/myProj/Passion_Project/FrontEnd/deals.jpeg')
+    
 with dataset:
-    st.header('Amazon toys dataset')
-    df = pd.read_csv('/Users/vandana/myProj/Passion_Project/FrontEnd/toys.csv')
-    
+    st.header('Amazon:'+select_platform)
+    #st.write(select_platform)
+    if select_platform == 'Toys':
+    #df = pd.read_csv('/Users/vandana/myProj/Passion_Project/FrontEnd/toys.csv')
+        #st.write('here toys')
+        df = pd.read_csv('/Users/vandana/myProj/Passion_Project/FrontEnd/toys.csv')
 
-    #df1.style.format({'url':})
-    df.style.format({'ProdLink': make_clickable})
-    #st.write(HTML(df.head().to_html(render_links=True,col_space='10px')))
-    st.write(df.style.format({'deals': '{:.2f}'}), width=5000, height=1000)
-    
+    if select_platform == 'Laptops':
+        #st.write('here laptops')
+        df = pd.read_csv('/Users/vandana/myProj/Passion_Project/FrontEnd/laptopdf.csv')
+    df.drop(['No'],axis='columns', inplace=True)
+
+    st.dataframe(df)    
 
     df2=df
-    df2['bins']=pd.cut(df['PercentReduction'],bins=[0,30,45,65], labels=["0-30","30-45","45+"])
+    df2['bins']=pd.cut(df['PercentReduction'],bins=[0,30,45,65], labels=["0-30%","30-45%","45+%"])
+    
     df3=df2
-    df3=df3.groupby(['PercentReduction','bins']).size().unstack(fill_value=0)
+    #st.write(df3)
+    
+    
+
     bin_percent = pd.DataFrame(df2['bins'].value_counts(normalize=True)*100)
     plot = bin_percent.plot.pie(y='bins',figsize=(5,5), autopct='%1.1f%%')
-    #print(plot)
-    # st.write(plot)
-    #st.pyplot(plot)
-    #st.plotly_chart(plot)
-    #input_col, pie_col = st.beta_columns(2)
-    #st.write(df3)
-    #df3 = df3.reset_index()
-    #df3.columns = ['PercentReduction', 'bins']
-    #fig = px.pie(df3, values = 'bins')
-    #pie_col.write(fig)
-   #st.plotly_chart(fig)
+    #st.write(plot)
+   
+
+    #st.write(df2.iloc[:,-1].value_counts().plot.pie(autopct="%1.1f%%"))
+    #st.pyplot(bin_percent.iloc[:,-1].value_counts().plot.pie(autopct="%1.1f%%"))
     
+    #st.write(bin_percent.head())
+    st.header("Pie Chart1")
+    #fig2=px2.pie(bin_percent,labels=bin_percent['index'], values='bins', names='bins')
+
+    fig2=px2.pie(bin_percent, values='bins', names=bin_percent.index)
+    
+    st.plotly_chart(fig2)
+
+   #reviews based
+    df5=df
+    df5['bins']=pd.cut(df['TotalReviews'],bins=[0,500,1000,100000], labels=["0-500","500-1000","1000+"])
+
+    bin_percent2 = pd.DataFrame(df5['bins'].value_counts(normalize=True)*100)    
+    st.header("Pie Chart2")
+    fig3=px2.pie(bin_percent2, values='bins', names=bin_percent2.index)
+    
+    st.plotly_chart(fig3)
+
+
     #working
     perc = pd.DataFrame(df['PercentReduction']).head(20)
     st.bar_chart(perc)
 
 
-    
+
 
 def sidebar_bg(side_bg):
     side_bg_ext = 'jpeg'
