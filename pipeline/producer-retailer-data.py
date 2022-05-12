@@ -21,8 +21,8 @@ def create_value(row,price):
     
     if len(str(row))==0:
       return price
-    if '%' in row:
-       return price - (price * float(row.split(" ")[1].split("%")[0])/100)
+    if '%' in row and 'Save' in row:
+      return price - (price * float(row.split(" ")[1].split("%")[0])/100)
     elif '$' in row:
        return price - float(row.split('$')[1])
     else:
@@ -79,8 +79,8 @@ def cleanData(path1):
 
     #handle default data type, format
     locale.setlocale(locale.LC_ALL,'')
-    df['Price']=df.Price.map(lambda x: locale.atof(x.strip('$')))
-    df['OrgPrice']=df.OrgPrice.map(lambda x: locale.atof(x.strip('$')))
+    df['Price']=df.Price.map(lambda x: locale.atof(str(x).strip('$')))
+    df['OrgPrice']=df.OrgPrice.map(lambda x: locale.atof(str(x).strip('$')))
 
     # initially data type is object, converting to numeric
     df['Price'] = pd.to_numeric(df['Price'])
@@ -91,6 +91,8 @@ def cleanData(path1):
     df['CouponsSummery'] = df['CouponsSummery'].fillna('')
     #passing row[couponSummary] and row[price] column price for Couponed price
     df['CouponPrice'] = df.apply(lambda row: create_value(row['CouponsSummery'],row['Price']), axis=1)
+    df['PercentReduction'] = df.apply(lambda row: abs(((row.CouponPrice - row.OrgPrice)/row.OrgPrice) * 100), axis=1)
+    df.head(10)
 
 
      #row which have empty values, removing '/" 
@@ -105,7 +107,9 @@ class Producer:
         self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
        
     def emit(self):
-        path1='s3://productscsv/toys.csv'
+        #path1='s3://productscsv/toys.csv'
+        #path1='s3://productscsv/hp_laptops.csv'
+        path1='s3://productscsv/hp_laptops_500rows.csv'
         #df_toys=pd.read_csv(path1)
         df_toys=cleanData(path1)
         print(df_toys)
@@ -122,7 +126,7 @@ class Producer:
         #self.producer.send('READDATA_PROJECT', key=b'message-two', value=b'This is Kafka-Python')
         data = self.emit()
         #print('Test Data', data)
-        
+        #self.producer.send(topic='READ_LAPTOP', value=data)
         self.producer.send(topic='READ_DATA', value=data)
         #data5 = json.dumps(data)
         self.producer.flush()
